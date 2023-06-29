@@ -54,6 +54,29 @@ calcForm.addEventListener('submit', (event) => {
     }
 })
 
+const scrollController = {
+    scrollPosition: 0,
+    disabledScroll() {
+        scrollController.scrollPosition = window.scrollY;
+      document.body.style.cssText = `
+      overflow: hidden;
+      position: fixed;
+      top: -${scrollController.scrollPosition}px;
+      left: 0;
+      height: 100vh;
+      width: 100vw;
+      padding-right: ${window.innerWidth - document.body.offsetWidth}px
+
+      `;
+      document.documentElement.style.scrollBehavior = 'unset';
+    },
+    enabledScroll() {
+     document.body.style.cssText = '';
+     window.scroll({top: scrollController.scrollPosition})
+     document.documentElement.style.scrollBehavior = '';
+    },
+}
+
 const modalController = ({modal, btnOpen, btnClose, time = 300}) => {
      const buttonElems = document.querySelectorAll(btnOpen);
 const modalElem = document.querySelector(modal);
@@ -69,13 +92,14 @@ const closeModal = event => {
     const target = event.target;
 
     if(target === modalElem ||
-        (btnCLose && target.closest(btnClose)) || 
+        (btnClose && target.closest(btnClose)) || 
         event.code === 'Escape') {
 
         modalElem.style.opacity = 0;
 
         setTimeout(() => {
             modalElem.style.visibility = 'hidden';
+            scrollController.enabledScroll();
         }, 300);
 
         window.removeEventListener('keydown', closeModal);
@@ -85,6 +109,7 @@ const closeModal = event => {
 const openModal = () => {
     modalElem.style.visibility = 'visible';
     modalElem.style.opacity = 1;
+    scrollController.disabledScroll();
 };
 
 buttonElems.forEach(btn => {
@@ -95,14 +120,10 @@ btn.addEventListener('click', openModal);
 modalElem.addEventListener('click', closeModal);
 };
 
-modalController({
-    modal: '.modal1',
-    btnOpen: '.section__button',
-    btnClose: '.modal__close'
-});
 
 modalController({
-    modal: '.modal2',
-    btnOpen: '.section__button2',
-    btnClose: '.modal__close'
+    modal: '.modal',
+    btnOpen: '.js-order',
+     btnClose: '.modal__close',
+      time: 400
 })
